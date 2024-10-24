@@ -1,19 +1,14 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 class Cliente(models.Model):
-    nombre = models.CharField(max_length=50)
-    apellido = models.CharField(max_length=50)
-    fecha_nacimiento = models.DateField()
-    correo_electronico = models.EmailField(unique=True)
+    usuario = models.OneToOneField(User,null=True,on_delete=models.CASCADE)
     telefono = models.CharField(max_length=20)
     direccion = models.CharField(max_length=255)
-    fecha_registro = models.DateField(auto_now_add=True)
+
 
 class Instructor(models.Model):
-    nombre = models.CharField(max_length=50)
-    apellido = models.CharField(max_length=50)
+    usuario = models.OneToOneField(User,null=True,on_delete=models.CASCADE)
     especialidad = models.CharField(max_length=100)
-    correo_electronico = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20)
     fecha_contratacion = models.DateField()
 
@@ -25,11 +20,14 @@ class Clase(models.Model):
     hora_fin = models.TimeField()
     instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
 
+
 class Membresia(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     tipo_membresia = models.CharField(max_length=50)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     duracion = models.IntegerField()
     descripcion = models.TextField()
+
 
 class Pago(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
