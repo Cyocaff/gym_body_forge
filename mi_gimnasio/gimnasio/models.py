@@ -1,0 +1,52 @@
+from django.db import models
+
+class Cliente(models.Model):
+    nombre = models.CharField(max_length=50)
+    apellido = models.CharField(max_length=50)
+    fecha_nacimiento = models.DateField()
+    correo_electronico = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=20)
+    direccion = models.CharField(max_length=255)
+    fecha_registro = models.DateField(auto_now_add=True)
+
+class Instructor(models.Model):
+    nombre = models.CharField(max_length=50)
+    apellido = models.CharField(max_length=50)
+    especialidad = models.CharField(max_length=100)
+    correo_electronico = models.EmailField(unique=True)
+    telefono = models.CharField(max_length=20)
+    fecha_contratacion = models.DateField()
+
+class Clase(models.Model):
+    nombre_clase = models.CharField(max_length=100)
+    descripcion = models.TextField()
+    fecha_clase = models.DateField()
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
+
+class Membresia(models.Model):
+    tipo_membresia = models.CharField(max_length=50)
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    duracion = models.IntegerField()
+    descripcion = models.TextField()
+
+class Pago(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha_pago = models.DateField()
+    metodo_pago = models.CharField(max_length=50)
+    estado_pago = models.CharField(max_length=20)
+
+class Asistencia(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    clase = models.ForeignKey(Clase, on_delete=models.CASCADE)
+    fecha_asistencia = models.DateField()
+    hora_entrada = models.TimeField()
+    hora_salida = models.TimeField()
+
+class Factura(models.Model):
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    fecha_emision = models.DateField()
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    detalles_factura = models.TextField()
