@@ -1,8 +1,46 @@
 from django.contrib.auth.models import User
+from .models import Cliente,Instructor, Pago, Clase, Membresia, Asistencia, Factura
 from rest_framework import serializers
 
-class UserSerializer(serializers.ModelSerializer):
+class ClienteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cliente
+        fields = ['telefono', 'direccion']
+class InstructorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Instructor
+        fields = '__all__'
+class PagoSerializer(serializers.ModelSerializer):
+    #cliente = ClienteSerializer()
+    class Meta:
+        model = Pago
+        fields = '__all__'
+class MembresiaSerializer(serializers.ModelSerializer):
+    #cliente = ClienteSerializer()
+    class Meta:
+        model = Membresia
+        fields = '__all__'
+class ClaseSerializer(serializers.ModelSerializer):
+   # instructor = InstructorSerializer()
+    class Meta:
+        model = Clase
+        fields = '__all__'
+class AsistenciaSerializer(serializers.ModelSerializer):
+ #   cliente = ClienteSerializer()
+  #  clase = ClaseSerializer()
+    class Meta:
+        model = Asistencia
+        fields = '__all__'
+class FacturaSerializer(serializers.ModelSerializer):
+#    cliente = ClienteSerializer()
+    class Meta:
+        model = Factura
+        fields = '__all__'
 
+
+class UserSerializer(serializers.ModelSerializer):
+ #   cliente  = ClienteSerializer()
+#    instructor = InstructorSerializer()
     class Meta:
         model = User
         fields = '__all__'
