@@ -1,12 +1,16 @@
-<form id="register_form">
-    <input type="text" name="username" placeholder="Username">
-    <input type="password" name="password" placeholder="Password">
-    <input type="email" name="email" placeholder="Email">
-    <input type="text" name="first_name" placeholder="Nombre">
-    <input type="text" name="last_name" placeholder="Apellido">
-    <input type="submit">
-</form>
 
+<title>Registro</title>
+<center><h1>Registro</h1></center>
+<div class="form">
+<form id="register_form">
+    <input type="text" name="username" placeholder="Username" class="form-control">
+    <input type="password" name="password" placeholder="Password" class="form-control">
+    <input type="email" name="email" placeholder="Email" class="form-control">
+    <input type="text" name="first_name" placeholder="Nombre" class="form-control">
+    <input type="text" name="last_name" placeholder="Apellido" class="form-control">
+    <input type="submit" class="btn btn-primary btn-block">
+</form>
+</div>
 <script>
 $(document).on('submit', '#register_form', function(e) {
     e.preventDefault();

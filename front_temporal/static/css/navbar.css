@@ -9,3 +9,18 @@ height: 100px;
 background-color: black;
 margin: auto;
 }
+.form{
+margin: auto;
+width: 30%;
+min-width: 450px;
+border: solid 1px, black;
+border-radius: 8px;
+}
+.form form{
+display: flex;
+flex-direction: column;
+}
+.form input{
+	width: 100%;
+	margin: auto;
+}
