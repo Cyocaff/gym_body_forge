@@ -96,8 +96,12 @@ DATABASES = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=6600),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=31),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": False,
+    "UPDATE_LAST_LOGIN": False,
+    "LEEWAY": timedelta(days=2),
     }
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -126,12 +130,9 @@ REST_FRAMEWORK = {
     ]
 }
 
-SIMPLE_JWT = {
-
-    }
 CORS_ALLOWED_ORIGINS = [
         'http://localhost:5173',
-        'http://localhost:3000'
+        'http://localhost:8003'
 ]
 CORS_ALLOW_CREDENTIALS = True
 
@@ -158,3 +159,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+from rest_framework_simplejwt.settings import api_settings
+
+# Add this somewhere in your code temporarily to debug
+print(api_settings.ACCESS_TOKEN_LIFETIME)

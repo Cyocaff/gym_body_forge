@@ -10,8 +10,8 @@ from .views import (
 
 urlpatterns=[
         #   path('api/', include (router.urls)),
-    path('test/', views.ExampleView.as_view()),
-#    path('register/', views.RegisterView.as_view(), name='register'),
+    path('home/', views.ExampleView.as_view()),
+    path('register/', views.RegisterView.as_view(), name='register'),
     path('users/', UserListCreateView.as_view(), name='user-list-create'),
     path('clientes/', ClienteListCreateView.as_view(), name='cliente-list-create'),
     path('instructores/', InstructorListCreateView.as_view(), name='instructor-list-create'),

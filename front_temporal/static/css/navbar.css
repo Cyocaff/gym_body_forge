@@ -1,0 +1,11 @@
+.navbar-main{
+width: 100%;
+display: flex;
+background-color: #ffc091;
+color: black;
+height: 100px;
+}
+.display-board{
+background-color: black;
+margin: auto;
+}

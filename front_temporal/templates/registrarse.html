@@ -1,0 +1,48 @@
+<form id="register_form">
+    <input type="text" name="username" placeholder="Username">
+    <input type="password" name="password" placeholder="Password">
+    <input type="email" name="email" placeholder="Email">
+    <input type="text" name="first_name" placeholder="Nombre">
+    <input type="text" name="last_name" placeholder="Apellido">
+    <input type="submit">
+</form>
+
+<script>
+$(document).on('submit', '#register_form', function(e) {
+    e.preventDefault();
+    
+    const username = $('input[name="username"]').val();
+    const password = $('input[name="password"]').val();
+    const email = $('input[name="email"]').val();
+    const firstName = $('input[name="first_name"]').val();
+    const lastName = $('input[name="last_name"]').val();
+
+    $.ajax({
+        url: 'http://localhost:8000/api/register/',
+        method: 'POST',
+        crossDomain: true,
+        credentials: 'include',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        data: JSON.stringify({
+            username: username,
+            password: password,
+            email: email,
+            first_name: firstName,
+            last_name: lastName
+        }),
+        success: function(response) {
+            console.log('Registration successful', response);
+            alert('Registro completado con éxito');
+            window.location.href = '/login';
+        },
+        error: function(xhr, status, error) {
+            console.log('Registration failed:', error);
+            console.log(xhr.responseText);
+            alert('Error en el registro: ' + xhr.responseText);
+        }
+    });
+});
+</script>

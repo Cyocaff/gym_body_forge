@@ -32,7 +32,7 @@ Comandos para auth:
 
 
     Testear Auth:
-    curl -H "Authorization: Bearer INSERTAR_TOKEN_GENERADO_AQUI"   http://localhost:8000/app/test/
+    curl -H "Authorization: Bearer INSERTAR_TOKEN_GENERADO_AQUI"   http://localhost:8000/api/home/
 
     Ejemplo de mensaje de auth exitoso:
 {"user":"newuser","auth":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI5NzQxMjk2LCJpYXQiOjE3Mjk3NDA5OTYsImp0aSI6ImE1MjhmNDI3ZGU4MDRjNjY4NDM3ZGU3NWVkMzg3ZmY1IiwidXNlcl9pZCI6Mn0.39_2bgIYBru3V3LyLc2vkptEES3VULv9KzcX8PLuGUU","message":"Success!"}
@@ -49,6 +49,17 @@ class ExampleView(APIView):
             'message': 'Success!'
         }
         return Response(content)
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -109,6 +120,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 
 def login_view(request):
+    from rest_framework_simplejwt.settings import api_settings
+
+# Add this somewhere in your code temporarily to debug
+    print(api_settings.ACCESS_TOKEN_LIFETIME)
+    print('')
         # If user is already authenticated, redirect to home
     if request.user.is_authenticated:
         return redirect('home')

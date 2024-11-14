@@ -1,0 +1,18 @@
+{% extends 'navbar.html' %}
+{% block content %}
+<script src="/static/something.js"></script>
+<script src="/static/js/core/jquery-3.7.1.min.js"></script>
+<script src="/static/js/core/page_load.js"></script>
+<link rel="stylesheet" href="/static/css/navbar.css">
+{% if load_data %}
+	{% if error_404 %}
+	{% else %}
+	<script>
+		console.log('page not loaded with ajax.')
+		loadPage(window.location.pathname);
+	</script>
+	{% endif %}
+{% endif %}
+
+<div id="page_content_body"><h1>Error 404 page not found</h1></div>
+{% endblock %}
