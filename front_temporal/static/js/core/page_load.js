@@ -1,7 +1,7 @@
 let token = localStorage.getItem('accessToken');
 let user_data
 let page_data
-const publicPages = ['/login','/registrarse']
+const publicPages = ['/login','/registrarse','/preguntas','/nosotros']
 function logout(){
 	localStorage.removeItem('accessToken')
 }
@@ -34,7 +34,7 @@ function loadData(path) {
 		return page_data;
 	}).catch(function(error) {
 		console.error('Failed to load page data:', error);
-		throw error;
+		return null;
 	})};
 
 if (token){

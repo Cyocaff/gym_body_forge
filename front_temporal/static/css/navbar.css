@@ -6,8 +6,8 @@ color: black;
 height: 100px;
 }
 .display-board{
-background-color: black;
 margin: auto;
+width: 80%;
 }
 .form{
 margin: auto;
@@ -23,4 +23,16 @@ flex-direction: column;
 .form input{
 	width: 100%;
 	margin: auto;
+}
+.page-footer{
+width: 100%;
+display: flex;
+color: white;
+background-color: #222222;
+margin-top: 200px;
+min-height: 300px;
+}
+.geeter{
+display: flex;
+width: fit-content;
 }
