@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from django.contrib.auth import authenticate, login
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,7 +25,7 @@ Comandos para auth:
           "email": "newuser@example.com",
           "first_name": "FirstName",
           "last_name": "LastName"
-        }' http://localhost:8000/app/register/
+        }' http://localhost:8000/api/register/
 
     Login:
         curl   -X POST   -H "Content-Type: application/json"   -d '{"username": "newuser", "password": "newpassword123"}'   http://localhost:8000/api/token/
@@ -94,3 +95,35 @@ class FacturaListCreateView(generics.ListCreateAPIView):
     queryset = Factura.objects.all()
     serializer_class = FacturaSerializer
     permission_classes = [AllowAny]
+
+
+
+
+
+
+
+
+
+# TRANSITION VIEWS (TEMPORAL FOR DEMO)
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+
+def login_view(request):
+        # If user is already authenticated, redirect to home
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user:
+            login(request, user)
+            print('logged')
+            return redirect('/home')
+        else:
+         print('error')
+         return render(request, 'login.html',{'error': 'unknown error'})
+    return render(request, 'login.html')
