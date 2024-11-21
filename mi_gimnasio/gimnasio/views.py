@@ -50,6 +50,43 @@ class ExampleView(APIView):
         }
         return Response(content)
 
+class perfil(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, format=None):
+        user = request.user
+        cliente = user.cliente
+        
+        asistencias = Asistencia.objects.filter(cliente=cliente).select_related('clase').order_by('-fecha_asistencia')[:10]
+        
+        historial_de_clases = [
+            {
+                'clase_nombre': asistencia.clase.nombre,  # Assuming Clase model has a 'nombre' field
+                'fecha_asistencia': asistencia.fecha_asistencia,
+                'hora_entrada': asistencia.hora_entrada,
+                'hora_salida': asistencia.hora_salida
+            } for asistencia in asistencias
+        ]
+        
+        content = {
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            },
+            'cliente': {
+                'telefono': cliente.telefono,
+                'direccion': cliente.direccion,
+            },
+            'attendance_history': attendance_history
+        }
+        
+        return Response(content)
+
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
     def post(self, request, format=None):
