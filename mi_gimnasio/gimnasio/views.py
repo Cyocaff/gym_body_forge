@@ -51,6 +51,9 @@ class ExampleView(APIView):
         return Response(content)
 
 class perfil(APIView):
+    """
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNjQ1NDgzLCJpYXQiOjE3MzMyNDk0ODMsImp0aSI6IjVmODJjNjAzZjU1YjQ1YTE5ZDE2M2QwYTYxMGRmYWIzIiwidXNlcl9pZCI6Mn0.135FqyOayr7p6fiLdk9lMpmxpQ0uJhl9NoQFTp2fe7Q"   http://localhost:8000/api/perfil/
+    """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     
@@ -58,14 +61,10 @@ class perfil(APIView):
         user = request.user
         cliente = user.cliente
         
-        asistencias = Asistencia.objects.filter(cliente=cliente).select_related('clase').order_by('-fecha_asistencia')[:10]
-        
-        historial_de_clases = [
+        asistencias = Asistencia.objects.filter(cliente=cliente).select_related('clase') 
+        attendance_history = [
             {
-                'clase_nombre': asistencia.clase.nombre,  # Assuming Clase model has a 'nombre' field
-                'fecha_asistencia': asistencia.fecha_asistencia,
-                'hora_entrada': asistencia.hora_entrada,
-                'hora_salida': asistencia.hora_salida
+                'clase_nombre': asistencia.clase.nombre_clase,  # Assuming Clase model has a 'nombre' field
             } for asistencia in asistencias
         ]
         
@@ -144,39 +143,33 @@ class FacturaListCreateView(generics.ListCreateAPIView):
     serializer_class = FacturaSerializer
     permission_classes = [AllowAny]
 
+class RegisterForClass(generics.CreateAPIView):
+
+    """
+curl -X POST \
+     -H "Authorization: Bearer TOKEN_AQUI" \
+     -H "Content-Type: application/json" \
+     http://localhost:8000/api/registrar_asistencia/1/post/
+
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        # Get the class_id from the URL kwargs
+        class_id = self.kwargs.get('class_id')
+        class_obj = Clase.objects.get(id=class_id)
+        # Get the authenticated user
+        user_id = request.user.id
+        cliente = User.objects.get(id=user_id)
+
+        # Create the Asistencia object
+        Asistencia.objects.create(
+            clase=class_obj,
+            cliente=cliente.cliente
+        )
+        return Response({"message": "Registered successfully"}, status=status.HTTP_201_CREATED)
 
 
 
 
-
-
-
-
-# TRANSITION VIEWS (TEMPORAL FOR DEMO)
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
-
-def login_view(request):
-    from rest_framework_simplejwt.settings import api_settings
-
-# Add this somewhere in your code temporarily to debug
-    print(api_settings.ACCESS_TOKEN_LIFETIME)
-    print('')
-        # If user is already authenticated, redirect to home
-    if request.user.is_authenticated:
-        return redirect('home')
-    
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user:
-            login(request, user)
-            print('logged')
-            return redirect('/home')
-        else:
-         print('error')
-         return render(request, 'login.html',{'error': 'unknown error'})
-    return render(request, 'login.html')

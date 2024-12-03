@@ -39,9 +39,6 @@ class Pago(models.Model):
 class Asistencia(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     clase = models.ForeignKey(Clase, on_delete=models.CASCADE)
-    fecha_asistencia = models.DateField()
-    hora_entrada = models.TimeField()
-    hora_salida = models.TimeField()
 
 class Factura(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
