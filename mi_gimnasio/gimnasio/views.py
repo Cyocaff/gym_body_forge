@@ -9,6 +9,7 @@ from rest_framework import viewsets
 from django.contrib.auth.models import User
 from rest_framework import status, generics
 from .models import Cliente, Instructor, Pago, Clase, Membresia, Asistencia, Factura
+from datetime import date
 from .serializers import (
     UserSerializer, ClienteSerializer, InstructorSerializer, 
     PagoSerializer, MembresiaSerializer, ClaseSerializer, 
@@ -50,7 +51,7 @@ class ExampleView(APIView):
         }
         return Response(content)
 
-class perfil(APIView):
+class perfil_cliente(APIView):
     """
 curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNjQ1NDgzLCJpYXQiOjE3MzMyNDk0ODMsImp0aSI6IjVmODJjNjAzZjU1YjQ1YTE5ZDE2M2QwYTYxMGRmYWIzIiwidXNlcl9pZCI6Mn0.135FqyOayr7p6fiLdk9lMpmxpQ0uJhl9NoQFTp2fe7Q"   http://localhost:8000/api/perfil/
     """
@@ -149,21 +150,17 @@ class RegisterForClass(generics.CreateAPIView):
 curl -X POST \
      -H "Authorization: Bearer TOKEN_AQUI" \
      -H "Content-Type: application/json" \
-     http://localhost:8000/api/registrar_asistencia/1/post/
+     http://localhost:8000/api/registrar_asistencia/id/post/
 
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        # Get the class_id from the URL kwargs
         class_id = self.kwargs.get('class_id')
         class_obj = Clase.objects.get(id=class_id)
-        # Get the authenticated user
         user_id = request.user.id
         cliente = User.objects.get(id=user_id)
-
-        # Create the Asistencia object
         Asistencia.objects.create(
             clase=class_obj,
             cliente=cliente.cliente
@@ -171,5 +168,57 @@ curl -X POST \
         return Response({"message": "Registered successfully"}, status=status.HTTP_201_CREATED)
 
 
+class ListClasses(APIView):
+    """
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNjQ1NDgzLCJpYXQiOjE3MzMyNDk0ODMsImp0aSI6IjVmODJjNjAzZjU1YjQ1YTE5ZDE2M2QwYTYxMGRmYWIzIiwidXNlcl9pZCI6Mn0.135FqyOayr7p6fiLdk9lMpmxpQ0uJhl9NoQFTp2fe7Q"   http://localhost:8000/api/clases/
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None):
+        class_obj = Clase.objects.filter(fecha_clase__gt=date.today())
+        serialized_data = ClaseSerializer(class_obj, many=True).data
 
+        return Response({"clases": serialized_data})
+        
+class CreateClass(APIView):
 
+    """
+     curl -X POST      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNzIwNjU0LCJpYXQiOjE3MzMzMjQ2NTQsImp0aSI6IjI4ZTU3OTVmMjcxMjRhYzA4ZTQ5NDQyYmJkY2JlM2RhIiwidXNlcl9pZCI6Mn0.GKSpM56JsNSXSAYMNyVU1GY27YkoUn7dJeJJrDh6JsY"      -H "Content-Type: application/json"      -d '{
+         "nombre_clase": "Yoga Basics",
+         "descripcion": "An introductory yoga class for beginners.",
+         "fecha_clase": "2024-12-15",
+         "hora_inicio": "10:00:00",
+         "hora_fin": "11:30:00",
+         "instructor_id": 1
+     }'      http://localhost:8000/api/clases/crear/
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            # Extract data from the request
+            data = request.data
+            instructor_id = data.get("instructor_id")
+
+            # Ensure the instructor exists
+            instructor = Instructor.objects.get(id=instructor_id)
+
+            # Create a new Clase object
+            clase = Clase.objects.create(
+                nombre_clase=data.get("nombre_clase"),
+                descripcion=data.get("descripcion"),
+                fecha_clase=data.get("fecha_clase"),
+                hora_inicio=data.get("hora_inicio"),
+                hora_fin=data.get("hora_fin"),
+                instructor=instructor
+            )
+
+            # Serialize and return success response
+            return Response({
+                "message": "Clase created successfully",
+                "id": clase.id
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -20,7 +20,8 @@ urlpatterns=[
     path('clases/', ClaseListCreateView.as_view(), name='clase-list-create'),
     path('asistencias/', AsistenciaListCreateView.as_view(), name='asistencia-list-create'),
     path('facturas/', FacturaListCreateView.as_view(), name='factura-list-create'),
-    path('perfil/', views.perfil.as_view()),
-
+    path('perfil/cliente/', views.perfil_cliente.as_view()),
+    path('clases/futuro/', views.ListClasses.as_view()),
+    path('clases/crear/', views.CreateClass.as_view(), name='create-class'),
     path('registrar_asistencia/<int:class_id>/post/', views.RegisterForClass.as_view(), name='register_attendance'),
     ]
