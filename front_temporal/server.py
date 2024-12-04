@@ -8,11 +8,13 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         print(self.path)
         if self.path[0:7] == '/static':
             return http.server.SimpleHTTPRequestHandler.do_GET(self)
+        else:
+            template_path = self.path.strip("/").split("/")[-1]
         if not self.headers.get('x-requested-with') == 'XMLHttpRequest':
             return view(self,'/base.html',{'load_data': True})
         if self.path == '/':
             self.path = '/base.html'
-        return view(self,f'{self.path}.html',{'message':'hello',
+        return view(self,f'{template_path}.html',{'message':'hello',
                    'message2':'world'  
                    })
 socketserver.TCPServer.allow_reuse_address = True  
