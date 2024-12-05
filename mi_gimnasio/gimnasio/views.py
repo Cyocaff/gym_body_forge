@@ -203,6 +203,12 @@ class CreateClass(APIView):
     authentication_classes = [JWTAuthentication]
     def post(self, request, *args, **kwargs):
         try:
+            user_object = request.user
+            try:
+                if user_object.instructor:
+                    print("")
+            except Exception:
+                return Response({"message": "User is sot authorized to perform operation"})
             # Extract data from the request
             data = request.data
             instructor_id = data.get("instructor_id")
