@@ -20,21 +20,19 @@ class Clase(models.Model):
     hora_fin = models.TimeField()
     instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
 
-
-class Membresia(models.Model):
-    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
-    tipo_membresia = models.CharField(max_length=50)
-    precio = models.DecimalField(max_digits=10, decimal_places=2)
-    duracion = models.IntegerField()
-    descripcion = models.TextField()
-
-
 class Pago(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     fecha_pago = models.DateField()
     metodo_pago = models.CharField(max_length=50)
     estado_pago = models.CharField(max_length=20)
+
+class Membresia(models.Model):
+    pago = models.OneToOneField(Pago, on_delete=models.CASCADE)
+    tipo_membresia = models.CharField(max_length=50)
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    duracion = models.IntegerField()
+    descripcion = models.TextField()
 
 class Asistencia(models.Model):
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)

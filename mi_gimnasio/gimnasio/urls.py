@@ -24,4 +24,7 @@ urlpatterns=[
     path('clases/futuro/', views.ListClasses.as_view()),
     path('clases/crear/', views.CreateClass.as_view(), name='create-class'),
     path('registrar_asistencia/<int:class_id>/post/', views.RegisterForClass.as_view(), name='register_attendance'),
+    path('registrar_boleta/post/',views.GenerarBoleta.as_view()),
+    path('pagos/post/', views.BoletasCliente.as_view()),
+    path('membresia/post/', views.GenerarMembresia.as_view())
     ]

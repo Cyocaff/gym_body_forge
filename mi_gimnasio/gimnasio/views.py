@@ -15,7 +15,13 @@ from .serializers import (
     PagoSerializer, MembresiaSerializer, ClaseSerializer, 
     AsistenciaSerializer, FacturaSerializer
 )
-
+'''
+Por motivos de testeo se ha incluido un comand curl http por cada endpoint usable.
+En algunos comandon hay que reemplazar el token y el id.
+Los comandos para obtener es token se muestran mas abajo.
+Para cambiar la duracion y parametros leer la documentacion de JWT,
+los settings estan en settings.py.
+'''
 
 '''
 Comandos para auth:
@@ -29,7 +35,7 @@ Comandos para auth:
         }' http://localhost:8000/api/register/
 
     Login:
-        curl   -X POST   -H "Content-Type: application/json"   -d '{"username": "newuser", "password": "newpassword123"}'   http://localhost:8000/api/token/
+        curl   -X POST   -H "Content-Type: application/json"   -d '{"username": "newuser", "password": "newpassword123"}'   http://localhost:8000/auth/login/
 
 
     Testear Auth:
@@ -194,7 +200,7 @@ class CreateClass(APIView):
     """
 
     permission_classes = [IsAuthenticated]
-
+    authentication_classes = [JWTAuthentication]
     def post(self, request, *args, **kwargs):
         try:
             # Extract data from the request
@@ -222,3 +228,79 @@ class CreateClass(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+class GenerarBoleta(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    """
+         curl -X POST      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNzIwNjU0LCJpYXQiOjE3MzMzMjQ2NTQsImp0aSI6IjI4ZTU3OTVmMjcxMjRhYzA4ZTQ5NDQyYmJkY2JlM2RhIiwidXNlcl9pZCI6Mn0.GKSpM56JsNSXSAYMNyVU1GY27YkoUn7dJeJJrDh6JsY"      -H "Content-Type: application/json"      -d '{
+         "monto": 44500,
+         "fecha_pago": "2024-12-11",
+         "metodo_pago": "Debito"
+     }'      http://localhost:8000/api/registrar_boleta/post/
+    """
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            user= request.user
+            user_cliente = user.cliente
+            pago=Pago.objects.create(
+                cliente=user_cliente,
+                monto=data.get("monto"),
+                fecha_pago=data.get("fecha_pago"),
+                metodo_pago=data.get("metodo_pago"),
+            )
+
+            return Response({
+                "message": "Boleta created successfully",
+                "id": pago.id
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+class BoletasCliente(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    """
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNjQ1NDgzLCJpYXQiOjE3MzMyNDk0ODMsImp0aSI6IjVmODJjNjAzZjU1YjQ1YTE5ZDE2M2QwYTYxMGRmYWIzIiwidXNlcl9pZCI6Mn0.135FqyOayr7p6fiLdk9lMpmxpQ0uJhl9NoQFTp2fe7Q"   http://localhost:8000/api/pagos/
+    """
+    def get(self,request):
+        user = request.user
+        cliente = user.cliente
+        pagos_obj = Pago.objects.filter(cliente=cliente) 
+        serialized_data = PagoSerializer(pagos_obj, many=True).data
+        return Response({"pagos": serialized_data})
+class GenerarMembresia(APIView):
+    """
+         curl -X POST      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNzIwNjU0LCJpYXQiOjE3MzMzMjQ2NTQsImp0aSI6IjI4ZTU3OTVmMjcxMjRhYzA4ZTQ5NDQyYmJkY2JlM2RhIiwidXNlcl9pZCI6Mn0.GKSpM56JsNSXSAYMNyVU1GY27YkoUn7dJeJJrDh6JsY"      -H "Content-Type: application/json"      -d '{
+         "pago": 1,
+         "tipo_membresia": "Platino",
+         "precio": 1000,
+         "duracion": 1,
+         "descripcion": "Membresia platino mensual"
+     }'      http://localhost:8000/api/membresia/post/
+    """
+
+    """
+    Detalle: Las relaciones de pago - membresia son irrepetibles,
+    ademas, en caso de que el monto del pago no sea igual al precio de la
+    membresia, no se permitra proceder.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    def post(self, request, *args, **kwargs):
+        data = request.data
+#        pago_id = self.kwargs.get('pago_id')
+        pago_id = data.get("pago")
+        pago_obj = Pago.objects.get(id=pago_id)
+        if pago_obj.monto != data.get("precio"):
+            return Response({"message":"Monto de page erroneo, por favor contactar a servicio al cliente."})
+        membresia=Membresia.objects.create(
+            pago=pago_obj,
+            tipo_membresia=data.get("tipo_membresia"),
+            precio=data.get("precio"),
+            duracion=data.get("duracion"),
+            descripcion=data.get("descripcion")
+            )
+        return Response({
+            "message": "Boleta created successfully",
+            "id": membresia.id
+            }, status=status.HTTP_201_CREATED)
