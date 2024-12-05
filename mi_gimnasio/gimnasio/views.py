@@ -208,7 +208,7 @@ class CreateClass(APIView):
                 if user_object.instructor:
                     print("")
             except Exception:
-                return Response({"message": "User is sot authorized to perform operation"})
+                return Response({"message": "User is not authorized to perform operation"})
             # Extract data from the request
             data = request.data
             instructor_id = data.get("instructor_id")
@@ -266,7 +266,7 @@ class BoletasCliente(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     """
-curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNjQ1NDgzLCJpYXQiOjE3MzMyNDk0ODMsImp0aSI6IjVmODJjNjAzZjU1YjQ1YTE5ZDE2M2QwYTYxMGRmYWIzIiwidXNlcl9pZCI6Mn0.135FqyOayr7p6fiLdk9lMpmxpQ0uJhl9NoQFTp2fe7Q"   http://localhost:8000/api/pagos/
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNjQ1NDgzLCJpYXQiOjE3MzMyNDk0ODMsImp0aSI6IjVmODJjNjAzZjU1YjQ1YTE5ZDE2M2QwYTYxMGRmYWIzIiwidXNlcl9pZCI6Mn0.135FqyOayr7p6fiLdk9lMpmxpQ0uJhl9NoQFTp2fe7Q"   http://localhost:8000/api/cuenta/pagos/
     """
     def get(self,request):
         user = request.user
@@ -298,7 +298,7 @@ class GenerarMembresia(APIView):
         pago_id = data.get("pago")
         pago_obj = Pago.objects.get(id=pago_id)
         if pago_obj.monto != data.get("precio"):
-            return Response({"message":"Monto de page erroneo, por favor contactar a servicio al cliente."})
+            return Response({"message":"Monto de pago erroneo, por favor contactar a servicio al cliente."})
         membresia=Membresia.objects.create(
             pago=pago_obj,
             tipo_membresia=data.get("tipo_membresia"),
@@ -310,3 +310,52 @@ class GenerarMembresia(APIView):
             "message": "Boleta created successfully",
             "id": membresia.id
             }, status=status.HTTP_201_CREATED)
+
+class Membresias(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    """
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNjQ1NDgzLCJpYXQiOjE3MzMyNDk0ODMsImp0aSI6IjVmODJjNjAzZjU1YjQ1YTE5ZDE2M2QwYTYxMGRmYWIzIiwidXNlcl9pZCI6Mn0.135FqyOayr7p6fiLdk9lMpmxpQ0uJhl9NoQFTp2fe7Q"   http://localhost:8000/api/cuenta/membresias/
+    """
+    def get(self, request):
+        user_obj = request.user
+        cliente_obj = user_obj.cliente
+        membresias_obj = Membresia.objects.filter(pago__cliente=cliente_obj)
+        serialized_data = MembresiaSerializer(membresias_obj, many=True).data
+        return Response({"membresias": serialized_data})
+
+
+
+class GenerarFactura(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    """
+         curl -X POST      -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNzIwNjU0LCJpYXQiOjE3MzMzMjQ2NTQsImp0aSI6IjI4ZTU3OTVmMjcxMjRhYzA4ZTQ5NDQyYmJkY2JlM2RhIiwidXNlcl9pZCI6Mn0.GKSpM56JsNSXSAYMNyVU1GY27YkoUn7dJeJJrDh6JsY"      -H "Content-Type: application/json"      -d '{
+         "fecha_emision": "2024-12-12",
+         "total": 1000,
+         "detalles_factura": 1
+     }'      http://localhost:8000/api/factura/post/
+    """
+    def post(self,request,*args,**kwargs):
+        data = request.data
+        user_obj = request.user
+        factura = Factura.objects.create(
+                cliente = user_obj.cliente,
+                fecha_emision = data.get("fecha_emision"),
+                total = data.get("total"),
+                detalles_factura = data.get("detalles_factura")
+                )
+        return Response({"message": "Factura created successfully", "id": factura.id})
+
+class Facturas(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    """
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMzNjQ1NDgzLCJpYXQiOjE3MzMyNDk0ODMsImp0aSI6IjVmODJjNjAzZjU1YjQ1YTE5ZDE2M2QwYTYxMGRmYWIzIiwidXNlcl9pZCI6Mn0.135FqyOayr7p6fiLdk9lMpmxpQ0uJhl9NoQFTp2fe7Q"   http://localhost:8000/api/cuenta/facturas/
+    """
+    def get(self,request):
+        user_obj = request.user
+        cliente = user_obj.cliente
+        facturas_obj = Factura.objects.filter(cliente=cliente)
+        serialized_data = FacturaSerializer(facturas_obj, many=True).data
+        return Response({"pagos": serialized_data})
