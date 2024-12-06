@@ -45,6 +45,21 @@ Comandos para auth:
 {"user":"newuser","auth":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI5NzQxMjk2LCJpYXQiOjE3Mjk3NDA5OTYsImp0aSI6ImE1MjhmNDI3ZGU4MDRjNjY4NDM3ZGU3NWVkMzg3ZmY1IiwidXNlcl9pZCI6Mn0.39_2bgIYBru3V3LyLc2vkptEES3VULv9KzcX8PLuGUU","message":"Success!"}
 
 '''
+
+"""
+<=======================================>
+!!!!!README!!!! LEER AQUI, IMPORTANTE!!!!
+
+Por motivos de seguridad la unica forma de
+asignar la tabla 'Cliente' o 'Instructor' 
+a un usuario es a traves de el panel de
+administracion de Django admin en /admin/
+esto para prevenir una escalada de privilegios
+mediante ataques maliciosos en URLs
+<=======================================>
+"""
+
+
 class ExampleView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
